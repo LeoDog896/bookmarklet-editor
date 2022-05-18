@@ -1,42 +1,16 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { EditorState, basicSetup } from "@codemirror/basic-setup"
-  import { EditorView, keymap } from "@codemirror/view"
-  import { indentWithTab } from "@codemirror/commands"
-  import { javascript } from "@codemirror/lang-javascript"
-  import { ViewPlugin } from "@codemirror/view"
   import { minify } from "terser";
+  import Codemirror from "$lib/Codemirror.svelte"
+
+  const cssCodeGen = (content: string) => `document.head.appendChild(document.createElement("style")).innerHTML = \`${content}\`;`
 
   let jsCode = "";
+  let cssCode = "";
   let newScript = "";
   let scripts: { text: string, editable?: boolean }[] = [];
-  let parent: HTMLDivElement
 
-  const updatePlugin = ViewPlugin.fromClass(class {
-		constructor() {}
-		update(update) {
-			if (update.docChanged) jsCode = update.state.doc.toString()
-		}
-	})
+  $: appendedCode = cssCodeGen(cssCode) + jsCode
 
-  $: if (jsCode && globalThis.localStorage) localStorage.setItem("code", jsCode)
-
-  onMount(() => {
-
-    jsCode = localStorage.getItem("code") || ""
-    new EditorView({
-      state: EditorState.create({
-        doc: jsCode,
-        extensions: [
-          basicSetup,
-          keymap.of([indentWithTab]),
-          updatePlugin,
-          javascript()
-        ]
-      }),
-      parent
-    })
-  })
 </script>
 
 <div class="w-screen h-screen flex flex-row">
@@ -62,8 +36,9 @@
     }} placeholder="Add Script"/>
   </div>
   <div class="flex flex-col w-full">
-    <div bind:this={parent} class="w-full"></div>
-    {#await minify(jsCode) then minifiedCode}
+    <Codemirror language={"js"} bind:code={jsCode} localStorageKey={"code"}/>
+    <Codemirror language={"css"} bind:code={cssCode} localStorageKey={"css"}/>
+    {#await minify(appendedCode) then minifiedCode}
       <div class="p-8 bg-[#f5f5f5]">
         <a href={"javascript:" + minifiedCode.code}>javascript:{minifiedCode.code}</a>
       </div>
