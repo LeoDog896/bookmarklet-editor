@@ -39,5 +39,5 @@
 <div bind:this={parent}></div>
 
 {#await minify(jsCode) then minifiedCode}
-  <a href={"javascript:" + minifiedCode}>javascript:{minifiedCode.code}</a>
+  <a href={"javascript:" + minifiedCode.code}>javascript:{minifiedCode.code}</a>
 {/await}
