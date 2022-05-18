@@ -4,18 +4,31 @@
   import { EditorView, keymap } from "@codemirror/view"
   import { indentWithTab } from "@codemirror/commands"
   import { javascript } from "@codemirror/lang-javascript"
+  import { ViewPlugin } from "@codemirror/view"
   import { minify } from "terser";
 
   let jsCode: string = "";
   let parent: HTMLDivElement
 
+  const updatePlugin = ViewPlugin.fromClass(class {
+		constructor() {}
+		update(update) {
+			if (update.docChanged) jsCode = update.state.doc.toString()
+		}
+	})
+
+  $: if (jsCode && globalThis.localStorage) localStorage.setItem("code", jsCode)
+
   onMount(() => {
+
+    jsCode = localStorage.getItem("code") || ""
     new EditorView({
       state: EditorState.create({
-        jsCode,
+        doc: jsCode,
         extensions: [
           basicSetup,
           keymap.of([indentWithTab]),
+          updatePlugin,
           javascript()
         ]
       }),
