@@ -2,7 +2,7 @@
   import { minify } from "terser";
   import Codemirror from "$lib/Codemirror.svelte"
 
-  const cssCodeGen = (content: string) => `document.head.appendChild(document.createElement("style")).innerHTML = \`${content}\`;`
+  const cssCodeGen = (content: string) => content ? `document.head.appendChild(document.createElement("style")).innerHTML = \`${content}\`;` : ""
 
   let jsCode = "";
   let cssCode = "";
@@ -43,8 +43,8 @@
     </div>
   </div>
   <div class="flex flex-col w-full">
-    <Codemirror language={"js"} bind:code={jsCode} localStorageKey={"code"}/>
-    <Codemirror language={"css"} bind:code={cssCode} localStorageKey={"css"}/>
+    <Codemirror language={"js"} title={"JavaScript"} bind:code={jsCode} localStorageKey={"code"}/>
+    <Codemirror language={"css"} title={"CSS"} bind:code={cssCode} localStorageKey={"css"}/>
     {#await minify(appendedCode) then minifiedCode}
       <div class="p-8 bg-[#f5f5f5]">
         <a href={"javascript:" + minifiedCode.code}>javascript:{minifiedCode.code}</a>
